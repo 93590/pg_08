@@ -1,0 +1,194 @@
+# coding: utf8
+import pygame
+import random
+def load_menu():
+    items = [(160, 140, 'Game', (0, 255, 0), (255, 0, 0), 0),(280,200, 'stop', (255, 0, 0), (255, 0, 0), 1)] # создать вторую кнопку]
+ 
+    pygame.mouse.set_visible(True)
+ 
+    done = False
+    item = 0
+    while not done:
+        # закрасить фон полностью (screen и score)
+        screen.fill([0,0,0])
+        score.fill([0,0,0])
+        
+        for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+ 
+                if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                    if item == 0:
+                        done = True
+                    elif item == 1:
+                        pygame.quit()
+                        sys.exit()
+ 
+        pointer = pygame.mouse.get_pos()
+        for i in items:
+            if pointer[0]>i[0] and pointer[0]<i[0]+155 and pointer[1]>i[1] and pointer[1]<i[1]+50:
+                item = i[5]
+ 
+        for i in items:
+            if item == i[5]:
+                screen.blit(myFont.render(i[2], 1, i[4]), [i[0], i[1]-40])
+            else:
+                screen.blit(myFont.render(i[2], 1, i[3]), [i[0], i[1]-40])
+ 
+        window.blit(screen, [0, 40])
+        window.blit(score, [0, 0])
+        pygame.display.flip()
+
+boom = 0
+high = 0
+# задааем размер окна, создаем окно размера size
+size = [400, 460]
+window = pygame.display.set_mode(size)
+# задаем имя - в кавычках, т.к. текст - это строка
+pygame.display.set_caption('My second file')
+
+screen = pygame.Surface([400,400])
+score = pygame.Surface([400,60])
+counte_score = 0
+
+class Sprite:
+    def __init__(self, xpos, ypos, filename):
+        self.x = xpos
+        self.y = ypos
+        self.bitmap = pygame.image.load(filename)
+    def render(self):
+        screen.blit(self.bitmap,(self.x, self.y))
+
+
+def Intersect(s1_x, s2_x, s1_y, s2_y):
+    if ((s1_x>s2_x-40) and (s1_x<s2_x+40) and (s1_y>s2_y-40) and (s1_y<s2_y+40)):
+        return 1
+    else:
+        return 0
+#создать бонус
+#бонус для героя
+bones = Sprite(-100,100,'bones.png')
+bones.x=-100
+bones.y=-100
+    
+# создание персонажей
+# герой
+snor = Sprite(200, 350, 'snor.jpg')
+snor.x=-100
+snor.y=-100
+snor.push = False
+
+hero = Sprite(200, 350, 'hiro.jpg')
+hero.x = int(input())
+hero.y = int(input())
+# переменные-"переключатели" движения для героя
+hero.right = True
+hero.up = True
+# враг
+enemy = Sprite(200, 10, 'enemy.jpg')
+# переменные-"переключатели" движения для врага
+enemy.right = True
+enemy.up = False
+
+running = True
+
+pygame.font.init()
+myFont = pygame.font.Font(None,20)
+
+bone_spawn = 1
+
+while running:
+    # обработка событий
+    for e in pygame.event.get():
+        if e.type == pygame.QUIT:
+            running  = False
+        if e.type == pygame.KEYDOWN:
+           if e.key == pygame.K_UP and hero.y>200:
+                 hero.y-=10 
+           if e.key == pygame.K_DOWN and hero.y<360:
+                 hero.y+=10 
+           if e.key == pygame.K_LEFT and hero.x>0:
+                 hero.x-=10 
+           if e.key == pygame.K_RIGHT and hero.x<360:
+                 hero.x+=10
+                 
+           if e.key == pygame.K_SPACE:
+               snor.push = True
+               snor.x=hero.x
+               snor.y=hero.y
+    if snor.push == True:
+        snor.y-=10
+        if snor.y<0:
+            snor.push = False
+            snor.y=-100
+    else
+            
+    if bone_spawn == 1:        
+        bones.x=random.randint(0,360)
+        bones.y=random.randint(200,360)
+        bone_spawn = 0
+    
+    if Intersect (hero.x,bones.x,hero.y,bones.y):
+            counte_score+=2
+            bones.x=-100
+            bone_spawn = 1
+    # задайте фоновый цвет
+
+    if (boom == 0):
+        screen.fill([23, 198, 93])
+    else:
+        screen.fill([230,0,0])
+        score.fill([250,255,190])
+
+    # движение персонажей - аналогично тому,
+    # что делали с квадратом, но теперь по вертикали
+    '''if ehero.x = int(input())
+
+    if hero.up == True:
+        hero.y -= 1
+        if hero.y < 0:
+            hero.up = False
+    else:
+        hero.y += 15
+        if hero.y > 360:
+            hero.up = True'''
+
+    if enemy.right == True:
+        enemy.x -= 20
+
+        if enemy.x < 0:
+            enemy.right = False       
+
+    else:
+        enemy.x += 20
+        if enemy.x > 360:
+            enemy.right = True
+    #enemy.x = random.randint(0, 400)   
+    #enemy.y = random.randint(0, 400)
+
+    # столкновение персонажей
+    if Intersect(hero.x, enemy.x, hero.y, enemy.y):
+        hero.up = False
+        enemy.up = True
+        boom = 1
+
+    text=myFont.render('score',1,[255,0,0])
+    # отображение персонажей
+    if boom == 0:
+        hero.render()
+        enemy.render()
+    else:
+        enemy.y = hero.x
+        enemy.render()
+    snor.render()
+    bones.render() 
+    # отображение окна
+    score.blit(text,[30,35])
+    window.blit(screen, [0, 60])
+    window.blit(score,[0, 0])
+    pygame.display.flip()
+    pygame.time.delay(50)
+
+
+pygame.quit()
